@@ -96,6 +96,27 @@ public class CarControllerTest {
          *   the whole list of vehicles. This should utilize the car from `getCar()`
          *   below (the vehicle will be the first in the list).
          */
+        Car car=getCar();
+        mvc.perform(
+                post(new URI("/cars"))
+                        .content(json.write(car).getJson())
+                        .contentType(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status().isCreated());
+
+        System.out.println(car.getId());
+        mvc.perform(
+                get(new URI("/cars"))
+                .accept(MediaType.APPLICATION_JSON_UTF8)
+        )
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(jsonPath("$._embedded.carList.[0].location.lat").value(car.getLocation().getLat()))
+                .andExpect(jsonPath("$._embedded.carList.[0].location.lon").value(car.getLocation().getLon()))
+                .andExpect(jsonPath("$._embedded.carList.[0].condition").value(car.getCondition()))
+                .andExpect(jsonPath("$._embedded.carList.[0].details").value(car.getDetails()))
+                .andExpect(jsonPath("$._embedded.carList.[0].price").value(car.getPrice()));
+
+
 
     }
 

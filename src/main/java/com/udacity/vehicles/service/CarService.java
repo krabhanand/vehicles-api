@@ -1,9 +1,16 @@
 package com.udacity.vehicles.service;
 
+import com.udacity.vehicles.client.maps.Address;
+import com.udacity.vehicles.client.maps.MapsClient;
+import com.udacity.vehicles.client.prices.PriceClient;
+import com.udacity.vehicles.domain.Location;
 import com.udacity.vehicles.domain.car.Car;
 import com.udacity.vehicles.domain.car.CarRepository;
 import java.util.List;
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  * Implements the car service create, read, update or delete
@@ -14,13 +21,17 @@ import org.springframework.stereotype.Service;
 public class CarService {
 
     private final CarRepository repository;
+    private final MapsClient maps;
+    private final PriceClient pricing;
 
-    public CarService(CarRepository repository) {
+    public CarService(CarRepository repository, MapsClient maps, PriceClient pricing) {
         /**
          * TODO: Add the Maps and Pricing Web Clients you create
          *   in `VehiclesApiApplication` as arguments and set them here.
          */
         this.repository = repository;
+        this.maps=maps;
+        this.pricing=pricing;
     }
 
     /**
@@ -42,7 +53,8 @@ public class CarService {
          *   If it does not exist, throw a CarNotFoundException
          *   Remove the below code as part of your implementation.
          */
-        Car car = new Car();
+        Optional<Car> car = repository.findById(id);
+        if(!car.isPresent()) throw new CarNotFoundException();
 
         /**
          * TODO: Use the Pricing Web client you create in `VehiclesApiApplication`
@@ -52,6 +64,8 @@ public class CarService {
          *   the pricing service each time to get the price.
          */
 
+        String price = pricing.getPrice(id);
+        car.get().setPrice(price);
 
         /**
          * TODO: Use the Maps Web client you create in `VehiclesApiApplication`
@@ -61,9 +75,10 @@ public class CarService {
          * Note: The Location class file also uses @transient for the address,
          * meaning the Maps service needs to be called each time for the address.
          */
+        Location address = maps.getAddress(car.get().getLocation());
+        car.get().setLocation(address);
 
-
-        return car;
+        return car.get();
     }
 
     /**
@@ -93,11 +108,13 @@ public class CarService {
          * TODO: Find the car by ID from the `repository` if it exists.
          *   If it does not exist, throw a CarNotFoundException
          */
-
+        Optional<Car> car=repository.findById(id);
+        if(!car.isPresent()) throw new CarNotFoundException(" car cannoy be deleted because car with the given id does not exist");
 
         /**
          * TODO: Delete the car from the repository.
          */
+        repository.delete(car.get());
 
 
     }
