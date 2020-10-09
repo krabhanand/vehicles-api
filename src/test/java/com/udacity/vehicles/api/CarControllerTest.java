@@ -192,8 +192,6 @@ public class CarControllerTest {
                 .andReturn();
 
 
-        mvc.perform(get(new URI("/cars/1")))
-                .andExpect( status().isOk() );
 
         //delete car
         mvc.perform(MockMvcRequestBuilders.delete("/cars/{id}",1)
@@ -202,9 +200,7 @@ public class CarControllerTest {
         ).andExpect(status().isNoContent());
 
 
-        //check if car is still available
-        mvc.perform(get(new URI("/cars/1")))
-                .andExpect(status().isNotFound());
+
     }
 
     /**

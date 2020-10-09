@@ -103,7 +103,19 @@ public class CarService {
             return repository.findById(car.getId())
                     .map(carToBeUpdated -> {
                         carToBeUpdated.setDetails(car.getDetails());
-                        carToBeUpdated.setLocation(car.getLocation());
+
+                        Location address = maps.getAddress(car.getLocation());
+                        carToBeUpdated.setLocation(address);
+
+                        carToBeUpdated.setCondition(car.getCondition());
+                    //       carToBeUpdated.setCreatedAt(car.getCreatedAt());
+                        carToBeUpdated.setModifiedAt(car.getModifiedAt());
+
+                        String price = pricing.getPrice(car.getId());
+                        carToBeUpdated.setPrice(price);
+
+                        carToBeUpdated.setId(car.getId());
+
                         return repository.save(carToBeUpdated);
                     }).orElseThrow(CarNotFoundException::new);
         }
